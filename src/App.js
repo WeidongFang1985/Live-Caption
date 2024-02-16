@@ -1,20 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
 recognition.continuous = true;
 recognition.lang = 'en-US';
-recognition.interimResults = true; // 启用临时结果
+recognition.interimResults = true;
 
 function App() {
   const [isListening, setIsListening] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState('');
   const [finalTranscript, setFinalTranscript] = useState('');
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     handleListen();
   }, [isListening]);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
+    }
+  }, [finalTranscript, interimTranscript]);
 
   const handleListen = () => {
     if (isListening) {
@@ -36,12 +43,12 @@ function App() {
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) final += transcript + '\n'; // 添加换行符
+        if (event.results[i].isFinal) final += transcript + '\n';
         else interim += transcript;
       }
 
       setInterimTranscript(interim);
-      setFinalTranscript(finalTranscript => finalTranscript + final);
+      setFinalTranscript(prevTranscript => prevTranscript + final);
     };
 
     recognition.onerror = event => {
@@ -56,7 +63,8 @@ function App() {
       </button>
       <br/>
       <textarea
-        style={{ whiteSpace: 'pre-line' }}
+        ref={textareaRef}
+        style={{ whiteSpace: 'pre-line', overflowY: 'auto', height: '200px', maxWidth: '100%' }}
         value={finalTranscript + interimTranscript}
         readOnly
       ></textarea>
