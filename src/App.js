@@ -54,7 +54,12 @@ function App() {
       <button onClick={() => setIsListening(prevState => !prevState)}>
         {isListening ? 'Stop' : 'Start'}
       </button>
-      <p style={{ whiteSpace: 'pre-line' }}>{finalTranscript + interimTranscript}</p>
+      <br/>
+      <textarea
+        style={{ whiteSpace: 'pre-line' }}
+        value={finalTranscript + interimTranscript}
+        readOnly
+      ></textarea>
     </div>
   );
 }
