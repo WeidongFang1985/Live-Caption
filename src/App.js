@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import './App.css';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
@@ -61,13 +62,15 @@ function App() {
       <button onClick={() => setIsListening(prevState => !prevState)}>
         {isListening ? 'Stop' : 'Start'}
       </button>
-      <br/>
-      <textarea
-        ref={textareaRef}
-        style={{ whiteSpace: 'pre-line', overflowY: 'auto', height: '200px', maxWidth: '100%' }}
-        value={finalTranscript + interimTranscript}
-        readOnly
-      ></textarea>
+      <br/><br/>
+      <main className="main">
+        <textarea
+          ref={textareaRef}
+          style={{ whiteSpace: 'pre-line', overflowY: 'auto', height: '200px', width: "100%", fontSize: "18px" }}
+          value={finalTranscript + interimTranscript}
+          readOnly
+        ></textarea>
+      </main>
     </div>
   );
 }
