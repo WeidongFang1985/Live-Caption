@@ -15,6 +15,10 @@ function App() {
   const [finalTranscript, setFinalTranscript] = useState('');
   const textareaRef = useRef(null);
 
+  // Add a reference for AudioContext and gain node
+  const audioContextRef = useRef(null);
+  const gainNodeRef = useRef(null);
+
   useEffect(() => {
     handleListen();
   }, [isListening]);
@@ -27,6 +31,7 @@ function App() {
 
   const handleListen = () => {
     if (isListening) {
+      enhanceMicrophoneAudio(); // Enhance the microphone audio
       recognition.start();
       recognition.onend = () => {
         console.log("...continue listening...");
@@ -57,6 +62,42 @@ function App() {
       console.log("An error occurred in recognition: " + event.error);
     }
   };
+
+  // Function to enhance microphone audio
+  const enhanceMicrophoneAudio = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      // Create AudioContext and GainNode
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioContext.createMediaStreamSource(stream);
+      const gainNode = audioContext.createGain();
+
+      // Set gain value to amplify the audio signal
+      gainNode.gain.value = 3; // Adjust this value to control amplification
+
+      // Connect the nodes
+      source.connect(gainNode).connect(audioContext.destination);
+
+      // Save references for cleanup later
+      audioContextRef.current = audioContext;
+      gainNodeRef.current = gainNode;
+
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
+    }
+  };
+
+  // Cleanup function to stop AudioContext when not listening
+  useEffect(() => {
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+        gainNodeRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div className="container mt-4">
